@@ -7,7 +7,19 @@ const vnpayConfig = require('../config/vnpayConfig');
 
 class VNPayService {
   constructor() {
-    // Validate config values
+    this._initialized = false;
+    this.vnp_TmnCode = null;
+    this.vnp_HashSecret = null;
+    this.vnp_Url = null;
+    this.vnp_ReturnUrl = null;
+    this.vnp_IpnUrl = null;
+    this.vnp_CallbackUrl = null;
+  }
+
+  _ensureInitialized() {
+    if (this._initialized) return;
+    
+    // Validate config values only when actually needed
     if (!vnpayConfig.VNP_TMN_CODE) {
       throw new Error('VNP_TMN_CODE is not configured');
     }
@@ -27,9 +39,11 @@ class VNPayService {
     this.vnp_ReturnUrl = vnpayConfig.VNP_RETURN_URL;
     this.vnp_IpnUrl = vnpayConfig.VNP_IPN_URL;
     this.vnp_CallbackUrl = vnpayConfig.VNP_CALLBACK_URL;
+    this._initialized = true;
   }
 
   createPaymentUrl = async (paymentData) => {
+    this._ensureInitialized();
     console.log('DEBUG paymentData serice:', paymentData);
     try {
       const { 
@@ -157,6 +171,7 @@ class VNPayService {
   }
 
   verifyReturnUrl = (vnpParams) => {
+    this._ensureInitialized();
     try {
       const secureHash = vnpParams['vnp_SecureHash'];
       delete vnpParams['vnp_SecureHash'];
@@ -199,6 +214,7 @@ class VNPayService {
   }
 
   processIpn = (ipnData) => {
+    this._ensureInitialized();
     try {
       const secureHash = ipnData['vnp_SecureHash'];
       delete ipnData['vnp_SecureHash'];
@@ -230,6 +246,7 @@ class VNPayService {
   }
 
   async handleVNPayCallback(callbackData) {
+    this._ensureInitialized();
     try {
       const {
         vnp_TxnRef,

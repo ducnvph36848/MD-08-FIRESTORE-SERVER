@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/comment.controller');
-const auth = require('../middleware/authMiddleware'); // <-- dùng file của bạn
+const auth = require('../middlewares/authMiddleware'); // <-- dùng file của bạn
 
 // Lấy bình luận + tổng quan theo sản phẩm
 router.get('/product/:productId', ctrl.listByProduct);

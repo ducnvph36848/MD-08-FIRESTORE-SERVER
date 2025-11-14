@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/upload"); // đã sửa để phân biệt Cloudinary & Local
+const upload = require("../middlewares/upload"); // đã sửa để phân biệt Cloudinary & Local
 const User = require("../models/User");
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 const isProduction = process.env.NODE_ENV === "production";
 const useCloudinary = process.env.USE_CLOUDINARY === "true"; // thêm flag
-const serverURL = process.env.SERVER_URL || "http://localhost:5000";
+const serverURL = process.env.SERVER_URL || "http://localhost:5001";
 
 // Helper lấy URL phù hợp
 const getFileUrl = (file) => {

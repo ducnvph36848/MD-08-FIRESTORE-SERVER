@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
-const authMiddleware = require('../middleware/authMiddleware');
-const adminOnly = require('../middleware/adminOnly');
+const authMiddleware = require('../middlewares/authMiddleware');
+const adminOnly = require('../middlewares/adminOnly');
 
 // Lấy thông tin cá nhân
 router.get('/me', authMiddleware, userController.getMe);

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/product.controller");
-const upload = require("../middleware/upload");
+const upload = require("../middlewares/upload");
 
 // Middleware: chấp nhận upload nhiều loại trường
 const multiUpload = upload.fields([

@@ -1,11 +1,67 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const { Readable } = require("stream");
 const cloudinary = require("cloudinary").v2;
 
 const isProduction = process.env.NODE_ENV === "production";
 const useCloudinary = process.env.USE_CLOUDINARY === "true"; // ép dùng Cloudinary cả khi local
+
+// Custom Cloudinary storage for multer
+class CloudinaryStorage {
+  constructor(options) {
+    this.cloudinary = options.cloudinary;
+    this.params = options.params || {};
+  }
+
+  _handleFile(req, file, cb) {
+    // Collect the stream data into a buffer
+    const chunks = [];
+    file.stream.on("data", (chunk) => {
+      chunks.push(chunk);
+    });
+    
+    file.stream.on("end", () => {
+      const buffer = Buffer.concat(chunks);
+      
+      // Create a readable stream from the buffer
+      const stream = new Readable();
+      stream.push(buffer);
+      stream.push(null);
+
+      // Upload to Cloudinary
+      const uploadStream = this.cloudinary.uploader.upload_stream(
+        {
+          folder: this.params.folder || "firestore",
+          allowed_formats: this.params.allowed_formats || ["jpg", "jpeg", "png", "gif", "webp"],
+          transformation: this.params.transformation || [{ width: 800, height: 800, crop: "limit" }],
+          resource_type: "image",
+        },
+        (error, result) => {
+          if (error) {
+            return cb(error);
+          }
+          cb(null, {
+            path: result.secure_url,
+            filename: result.public_id,
+            size: result.bytes,
+          });
+        }
+      );
+
+      stream.pipe(uploadStream);
+    });
+    
+    file.stream.on("error", (error) => {
+      cb(error);
+    });
+  }
+
+  _removeFile(req, file, cb) {
+    // Cloudinary handles file removal separately if needed
+    cb(null);
+  }
+}
 
 let storage;
 

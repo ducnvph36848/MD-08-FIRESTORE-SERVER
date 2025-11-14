@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/payment.controller');
-const auth = require('../middleware/authMiddleware');
+const auth = require('../middlewares/authMiddleware');
 
 // Tạo URL thanh toán VNPay
 router.post('/create', auth, paymentController.createPayment);

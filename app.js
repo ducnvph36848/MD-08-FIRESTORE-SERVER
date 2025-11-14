@@ -33,6 +33,7 @@ const corsOptions = {
     "http://192.168.1.2:5002",
     "http://localhost:5002",
     "http://10.158.14.189",
+    "http://localhost:5003",
     
   ],
   credentials: true,
@@ -40,7 +41,6 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
 
 // Các middleware cần thiết
 app.use(logger("dev"));
