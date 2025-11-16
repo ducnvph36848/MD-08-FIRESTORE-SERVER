@@ -3,7 +3,7 @@ const moment = require('moment');
 const querystring = require('qs');
 const Payment = require('../models/Payment');
 const Order = require('../models/Order');
-const vnpayConfig = require('../config/vnpayConfig');
+const vnpayConfig = require('../config/vnPayConfig');
 
 class VNPayService {
   constructor() {
