@@ -34,8 +34,8 @@ exports.register = async (req, res) => {
     <p>Mã xác minh (OTP) của bạn là: <b>${otp}</b></p>
     <p>Mã này sẽ hết hạn sau 10 phút.</p>`;
 
-    await sendMail(email, "Xác minh tài khoản - FireStore", html);
-
+    // await sendMail(email, "Xác minh tài khoản - FireStore", html);
+    console.log(otp);
     res.json({ message: "Đã gửi mã OTP xác minh tới email", email });
   } catch (error) {
     console.error("Lỗi gửi OTP:", error);
@@ -47,17 +47,19 @@ exports.register = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp, full_name, password } = req.body;
-
+    console.log(email, otp, full_name, password);
     // 1. Tìm mã OTP hợp lệ
     const otpDoc = await OtpCode.findOne({ email, code: otp });
 
     if (!otpDoc || otpDoc.expiresAt < Date.now()) {
+      console.log("Mã OTP không hợp lệ hoặc đã hết hạn");
       return res.status(400).json({ message: "Mã OTP không hợp lệ hoặc đã hết hạn" });
     }
 
     // 2. Kiểm tra xem tài khoản đã tồn tại chưa
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log("Tài khoản đã tồn tại, vui lòng đăng nhập");
       return res.status(400).json({ message: "Tài khoản đã tồn tại, vui lòng đăng nhập" });
     }
 
@@ -108,7 +110,7 @@ exports.login = async (req, res) => {
     // Kiểm tra email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
+      return res.status(400).json({ message: "Email ko tồn tại" });
     }
 
     // So sánh mật khẩu
@@ -131,6 +133,7 @@ exports.login = async (req, res) => {
 
     // Trả về kết quả
     res.json({
+      success: true,
       message: "Đăng nhập thành công",
       token,
       user: {
