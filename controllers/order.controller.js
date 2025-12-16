@@ -32,6 +32,38 @@ exports.createCashOrder = async (req, res) => {
 
     console.log('Cash order created:', order._id);
 
+    // GIẢM TỒN KHO sau khi đặt hàng
+    try {
+      for (const item of items) {
+        const product = await Product.findById(item.product_id);
+        if (product) {
+          // Giảm tổng quantity
+          product.quantity = Math.max(0, product.quantity - item.quantity);
+
+          // Giảm quantity của variation tương ứng
+          if (item.size || item.color) {
+            const variation = product.variations.find(v =>
+              v.size === item.size && v.color === item.color
+            );
+            if (variation) {
+              variation.quantity = Math.max(0, variation.quantity - item.quantity);
+            }
+          }
+
+          // Cập nhật trạng thái nếu hết hàng
+          if (product.quantity === 0) {
+            product.status = 'Hết hàng';
+          }
+
+          await product.save();
+          console.log(`Updated stock for ${product.name}: ${product.quantity}`);
+        }
+      }
+    } catch (stockError) {
+      console.error('Error updating stock:', stockError);
+      // Không fail order nếu cập nhật stock lỗi
+    }
+
     // Remove purchased items from cart
     try {
       if (req.body.cart_item_ids && req.body.cart_item_ids.length > 0) {
@@ -82,6 +114,37 @@ exports.createVNPayOrder = async (req, res) => {
       total_amount: total || 0,
       status: 'pending'
     });
+
+    // GIẢM TỒN KHO sau khi đặt hàng
+    try {
+      for (const item of items) {
+        const product = await Product.findById(item.product_id);
+        if (product) {
+          // Giảm tổng quantity
+          product.quantity = Math.max(0, product.quantity - item.quantity);
+
+          // Giảm quantity của variation tương ứng
+          if (item.size || item.color) {
+            const variation = product.variations.find(v =>
+              v.size === item.size && v.color === item.color
+            );
+            if (variation) {
+              variation.quantity = Math.max(0, variation.quantity - item.quantity);
+            }
+          }
+
+          // Cập nhật trạng thái nếu hết hàng
+          if (product.quantity === 0) {
+            product.status = 'Hết hàng';
+          }
+
+          await product.save();
+          console.log(`Updated stock for ${product.name}: ${product.quantity}`);
+        }
+      }
+    } catch (stockError) {
+      console.error('Error updating stock:', stockError);
+    }
 
     // Remove purchased items from cart
     try {
